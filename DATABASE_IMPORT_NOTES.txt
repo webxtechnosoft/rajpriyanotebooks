@@ -1,0 +1,12 @@
+RAJPRIYA NOTEBOOKS - CLEAN PACKAGE NOTES
+
+1. database.sql is a consolidated fresh-install SQL file built from the live server schema.
+2. It contains table structures and current catalog/settings seed data, but intentionally excludes customer accounts, carts, orders, order items, parcel records, contact messages, reviews, and stock history.
+3. rajpriya_notebooks_live_backup.sql is a separate full live database backup. Keep it private and do not upload it to a public repository because it contains customer/order information.
+4. Never import the full live backup into a production database without taking a fresh backup first. It is a restore backup, not a migration.
+5. Current PHP login code compares passwords as plain text. The current admin seed uses the existing default password; change it immediately and fix password hashing before public deployment.
+6. Product/variant stock totals and some historical order product references need manual review. No live data was automatically corrected or deleted during this cleanup.
+
+Confirmed bundle size: POWER 60-page variants use 400 pieces per bundle (product std_qty = 400). Stock quantities were not recalculated or overwritten.
+
+To add per-variety MRP, Regular Price, Sale Price, and GST Rate to an existing database, run `php migrate_product_variant_mrp.php` from the project directory. Fresh installs already include these columns in database.sql. Leave per-variety values blank to inherit product-level pricing and GST.

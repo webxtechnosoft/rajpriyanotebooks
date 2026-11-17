@@ -1,0 +1,9 @@
+# Local credentials and environment settings
+.env
+.env.*
+!.env.example
+
+# Local runtime / generated files
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,28 @@
+RAJPRIYA NOTEBOOK PROJECT - PATCH NOTES
+======================================
+
+Updated modules:
+1. admin/includes/excel_parser.php
+   - Product ID parsing accepts integer IDs exported by spreadsheet software as e.g. 123.0.
+   - Existing product matching is case-insensitive and trims SKU whitespace.
+   - Legacy SKU cells containing a product variant code can resolve to the parent product and variant without overwriting the parent SKU.
+   - Product Excel import can create a new product when Product Name, unique SKU, valid Category Name, Rate / Price, and variant details are provided.
+   - New product imports use the existing product_variants save routine and synchronize parent stock totals.
+   - Multiple rows for one new SKU are grouped into one new product with separate variety records; duplicate variety codes are rejected.
+   - Product Excel import can add a missing variety to an existing product when Variant Code, Variety Code, and Variety display name are supplied; duplicate codes and variety names are rejected.
+   - Existing product fields are updated only when they differ from the database, preventing unchanged values on later variant rows from overwriting an edit such as Size.
+   - Product import preview lists changed parent fields, and successful product imports return to the Admin Products page so saved values are visible immediately.
+
+2. cart-action.php
+   - Add-to-cart and cart quantity updates no longer reject items based on current stock availability.
+   - Stock display and Admin stock management remain separate; this enables backorders / order requests for out-of-stock products.
+
+Validation performed:
+- PHP syntax lint passed for all project PHP files outside vendor.
+- Product Excel, stock Excel, and category Excel handler files passed syntax checks.
+
+Important notes:
+- A live MySQL/XAMPP end-to-end test could not be performed in this environment because the local database server and user's database are not connected here.
+- Before using on the live project, back up the database and test product export/import, stock export/import, category export/import, and cart flows locally.
+- The original .env file containing credentials was intentionally excluded from this ZIP for security. Copy .env.example to .env and enter your own credentials.
+- For a new product, keep the same Product Name, SKU, and Category Name on each variety row; use a unique Variety Code for each row. The importer creates one parent product and adds the separate variety records.

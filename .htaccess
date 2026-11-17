@@ -1,0 +1,10 @@
+# Protect environment files and sensitive configuration from public browser access
+<FilesMatch "^\.(env|git|htaccess)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(database\.sql|\.log|\.lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
