@@ -5,16 +5,16 @@
 date_default_timezone_set('Asia/Kolkata');
 
 // XAMPP defaults are used locally; hosting environments can override them.
- define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
- define('DB_USER', getenv('DB_USER') ?: 'root');
- define('DB_PASS', getenv('DB_PASS') ?: '');
-define('DB_NAME', getenv('DB_NAME') ?: 'rajpriya_notebooks');
+//  define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+//  define('DB_USER', getenv('DB_USER') ?: 'root');
+//  define('DB_PASS', getenv('DB_PASS') ?: '');
+// define('DB_NAME', getenv('DB_NAME') ?: 'rajpriya_notebooks');
 
 
-// define('DB_HOST', 'localhost');
-// define('DB_USER', 'webxtech_db');
-// define('DB_PASS', 'Webxtech_db');
-// define('DB_NAME', 'webxtech_rajpriyanotebooks');
+define('DB_HOST', 'localhost');
+define('DB_USER', 'webxtech_db');
+define('DB_PASS', 'Webxtech_db');
+define('DB_NAME', 'webxtech_rajpriyanotebooks');
 
 // Configurable Admin WhatsApp Number (Country code required, digits only)
 if (!defined('ADMIN_WHATSAPP_NUMBER')) {
