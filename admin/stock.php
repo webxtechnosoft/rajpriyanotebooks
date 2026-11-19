@@ -563,9 +563,6 @@ require_once __DIR__ . '/includes/admin_header.php';
                 <div class="fw-bold text-navy lh-sm"><?php echo htmlspecialchars($it['product_name']); ?></div>
                 <div class="small text-muted" style="font-size: 0.75rem;">
                   SKU: <?php echo htmlspecialchars($it['product_sku']); ?>
-                  <?php if (!empty($it['page_count'])): ?>
-                    • <?php echo $it['page_count']; ?> Pgs
-                  <?php endif; ?>
                 </div>
               </td>
               <td class="text-center">
