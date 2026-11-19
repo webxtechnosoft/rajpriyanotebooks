@@ -675,7 +675,7 @@ if (!empty($orders)) {
             $sigPath = dirname(__DIR__) . '/uploads/signature_jpg.webp';
         }
         if (file_exists($sigPath) && is_file($sigPath)) {
-            $sigMime = mime_content_type($sigPath) ?: 'image/png';
+            $sigMime = 'image/webp';
             $signatureSrc = 'data:' . $sigMime . ';base64,' . base64_encode(file_get_contents($sigPath));
         } else {
             $signatureSrc = '../assets/images/signature.webp';
