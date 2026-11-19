@@ -121,7 +121,6 @@ require_once __DIR__ . '/includes/admin_header.php';
         <tr class="table-light">
           <th>Image</th>
           <th>Category Name</th>
-          <th>Slug</th>
           <th>Description</th>
           <th>Products</th>
           <th>Status</th>
@@ -131,7 +130,7 @@ require_once __DIR__ . '/includes/admin_header.php';
       <tbody>
         <?php if (empty($categories)): ?>
           <tr>
-            <td colspan="7" class="text-center py-5 text-muted">
+            <td colspan="6" class="text-center py-5 text-muted">
               <div class="py-4">
                 <i class="bi bi-tags fs-1 text-muted d-block mb-2"></i>
                 <h6 class="fw-bold text-navy mb-1">No categories found matching your search</h6>
@@ -145,7 +144,6 @@ require_once __DIR__ . '/includes/admin_header.php';
             <tr>
               <td><img src="../<?php echo htmlspecialchars($cat['image']); ?>" alt="" style="width: 44px; height: 44px; object-fit: contain;"></td>
               <td class="fw-bold text-navy"><?php echo htmlspecialchars($cat['name']); ?></td>
-              <td><code><?php echo htmlspecialchars($cat['slug']); ?></code></td>
               <td class="small text-muted" style="max-width: 250px;"><?php echo htmlspecialchars($cat['description']); ?></td>
               <td><span class="badge bg-light text-dark border"><?php echo $cat['product_count']; ?> Notebooks</span></td>
               <td>
