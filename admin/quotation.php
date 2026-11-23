@@ -1023,13 +1023,14 @@ require_once __DIR__ . '/includes/admin_header.php';
                       <input type="number" name="items[<?php echo $idx; ?>][pieces_per_bundle]" class="form-control form-control-sm text-center item-ppb" min="1" value="<?php echo $ppb; ?>" oninput="recalcRow(this)" required>
                     </td>
                     <td class="text-center">
-                      <input type="number" name="items[<?php echo $idx; ?>][quantity]" class="form-control form-control-sm text-center fw-bold item-qty" min="1" value="<?php echo $qty; ?>" oninput="recalcRow(this)" required>
+                      <input type="number" name="items[<?php echo $idx; ?>][quantity]" class="form-control form-control-sm text-center fw-bold item-qty" min="1" step="1" value="<?php echo $qty; ?>" oninput="recalcRow(this)" onchange="recalcRow(this)" required>
                     </td>
                     <td class="text-center">
                       <span class="fw-bold text-navy item-total-pieces-label"><?php echo number_format($totPcs); ?></span>
                     </td>
                     <td>
                       <input type="number" step="0.01" min="0.01" name="items[<?php echo $idx; ?>][unit_price]" class="form-control form-control-sm text-end fw-semibold item-unit-price" value="<?php echo number_format($unitP, 2, '.', ''); ?>" oninput="recalcRow(this)" required>
+                      <div class="small text-muted text-end item-price-caption mt-1"></div>
                     </td>
                     <td>
                       <input type="number" step="0.01" min="0" name="items[<?php echo $idx; ?>][discount]" class="form-control form-control-sm text-end item-discount" value="<?php echo number_format($disc, 2, '.', ''); ?>" oninput="recalcRow(this)">
@@ -1320,14 +1321,14 @@ require_once __DIR__ . '/includes/admin_header.php';
         <div class="row g-3" id="modalDetailsContainer" style="display: none;">
           <div class="col-md-4">
             <label class="form-label small fw-semibold text-navy">Order Type</label>
-            <select id="modalOrderType" class="form-select form-select-sm">
+            <select id="modalOrderType" class="form-select form-select-sm" onchange="onModalOrderTypeChange()">
               <option value="Bundle">Bundle</option>
               <option value="Piece">Individual Piece</option>
             </select>
           </div>
           <div class="col-md-4">
             <label class="form-label small fw-semibold text-navy">Pieces per Bundle</label>
-            <input type="number" id="modalPpb" class="form-control form-control-sm text-center" min="1" value="1">
+            <input type="number" id="modalPpb" class="form-control form-control-sm text-center" min="1" value="1" onchange="onModalPpbChange()" oninput="onModalPpbChange()">
           </div>
           <div class="col-md-4">
             <label class="form-label small fw-semibold text-navy">Quantity</label>
@@ -1420,11 +1421,46 @@ function onModalVariantSelect() {
         const vOpt = vSel.options[vSel.selectedIndex];
         const bQty = parseInt(vOpt.getAttribute('data-bundle-qty') || 1, 10);
         document.getElementById('modalPpb').value = bQty;
-        document.getElementById('modalPrice').value = (salePrice * bQty).toFixed(2);
+        if (document.getElementById('modalOrderType').value === 'Piece') {
+            document.getElementById('modalPpb').value = '1';
+            document.getElementById('modalPpb').readOnly = true;
+            document.getElementById('modalPrice').value = salePrice.toFixed(2);
+        } else {
+            document.getElementById('modalPpb').readOnly = false;
+            document.getElementById('modalPrice').value = (salePrice * bQty).toFixed(2);
+        }
         btnAdd.disabled = false;
     } else {
         btnAdd.disabled = true;
     }
+}
+
+function onModalOrderTypeChange() {
+    const orderType = document.getElementById('modalOrderType').value;
+    const ppbInput = document.getElementById('modalPpb');
+    const priceInput = document.getElementById('modalPrice');
+    const productSelect = document.getElementById('modalProductSelect');
+    const productOption = productSelect.options[productSelect.selectedIndex];
+    const salePrice = parseFloat(productOption ? productOption.getAttribute('data-sale-price') : 0) || 0;
+
+    if (orderType === 'Piece') {
+        ppbInput.value = '1';
+        ppbInput.readOnly = true;
+        priceInput.value = salePrice.toFixed(2);
+    } else {
+        ppbInput.readOnly = false;
+        const ppb = Math.max(1, parseInt(ppbInput.value || 1, 10));
+        priceInput.value = (salePrice * ppb).toFixed(2);
+    }
+}
+
+function onModalPpbChange() {
+    if (document.getElementById('modalOrderType').value !== 'Bundle') return;
+    const ppb = Math.max(1, parseInt(document.getElementById('modalPpb').value || 1, 10));
+    const productSelect = document.getElementById('modalProductSelect');
+    const productOption = productSelect.options[productSelect.selectedIndex];
+    const salePrice = parseFloat(productOption ? productOption.getAttribute('data-sale-price') : 0) || 0;
+    document.getElementById('modalPrice').value = (salePrice * ppb).toFixed(2);
 }
 
 function addProductToTable() {
@@ -1502,13 +1538,14 @@ function addProductToTable() {
             <input type="number" name="items[${idx}][pieces_per_bundle]" class="form-control form-control-sm text-center item-ppb" min="1" value="${ppb}" oninput="recalcRow(this)" required>
         </td>
         <td class="text-center">
-            <input type="number" name="items[${idx}][quantity]" class="form-control form-control-sm text-center fw-bold item-qty" min="1" value="${qty}" oninput="recalcRow(this)" required>
+            <input type="number" name="items[${idx}][quantity]" class="form-control form-control-sm text-center fw-bold item-qty" min="1" step="1" value="${qty}" oninput="recalcRow(this)" onchange="recalcRow(this)" required>
         </td>
         <td class="text-center">
             <span class="fw-bold text-navy item-total-pieces-label">${totalPcs.toLocaleString()}</span>
         </td>
         <td>
             <input type="number" step="0.01" min="0.01" name="items[${idx}][unit_price]" class="form-control form-control-sm text-end fw-semibold item-unit-price" value="${unitPrice.toFixed(2)}" oninput="recalcRow(this)" required>
+            <div class="small text-muted text-end item-price-caption mt-1"></div>
         </td>
         <td>
             <input type="number" step="0.01" min="0" name="items[${idx}][discount]" class="form-control form-control-sm text-end item-discount" value="0.00" oninput="recalcRow(this)">
@@ -1536,6 +1573,12 @@ function addProductToTable() {
             </div>
         </td>
     `;
+    tr.dataset.lastOrderType = orderType;
+    tr.dataset.bundlePpb = String(isBundle ? ppb : 1);
+    tr.dataset.bundleUnitPrice = unitPrice.toFixed(2);
+    tr.dataset.piecePrice = (isBundle && ppb > 0
+        ? (unitPrice / ppb).toFixed(2)
+        : unitPrice.toFixed(2));
     tbody.appendChild(tr);
 
     // Close modal
@@ -1658,11 +1701,74 @@ function removeRow(btn) {
 
 function recalcRow(inputElem) {
     const row = inputElem.closest('tr');
-    const orderType = row.querySelector('.item-order-type').value;
-    const ppb = Math.max(1, parseInt(row.querySelector('.item-ppb').value || 1, 10));
-    const qty = Math.max(1, parseInt(row.querySelector('.item-qty').value || 1, 10));
-    const unitPrice = Math.max(0, parseFloat(row.querySelector('.item-unit-price').value || 0));
+    const orderTypeSelect = row.querySelector('.item-order-type');
+    const ppbInput = row.querySelector('.item-ppb');
+    const unitPriceInput = row.querySelector('.item-unit-price');
+    const qtyInput = row.querySelector('.item-qty');
+    const orderType = orderTypeSelect.value;
+    let ppb = Math.max(1, parseInt(ppbInput.value || 1, 10));
+    const typedQty = parseInt(qtyInput.value || 1, 10);
+    const qty = Number.isFinite(typedQty) ? Math.max(1, typedQty) : 1;
+    let unitPrice = Math.max(0, parseFloat(unitPriceInput.value || 0));
     const disc = Math.max(0, parseFloat(row.querySelector('.item-discount').value || 0));
+    const changedField = inputElem.classList.contains('item-ppb') ? 'ppb'
+        : inputElem.classList.contains('item-unit-price') ? 'unit'
+        : inputElem.classList.contains('item-qty') ? 'qty'
+        : 'type';
+
+    const previousOrderType = row.dataset.lastOrderType || orderType;
+    let piecePrice = Math.max(0, parseFloat(row.dataset.piecePrice || 0));
+    if (!piecePrice) {
+        piecePrice = orderType === 'Bundle'
+            ? (ppb > 0 ? unitPrice / ppb : unitPrice)
+            : unitPrice;
+    }
+
+    if (previousOrderType !== orderType) {
+        if (orderType === 'Piece') {
+            ppbInput.value = '1';
+            ppb = 1;
+            unitPriceInput.value = piecePrice.toFixed(2);
+            unitPrice = piecePrice;
+        } else {
+            const savedBundlePpb = Math.max(1, parseInt(row.dataset.bundlePpb || ppb, 10));
+            ppbInput.value = String(savedBundlePpb);
+            ppb = savedBundlePpb;
+            unitPrice = piecePrice * ppb;
+            unitPriceInput.value = unitPrice.toFixed(2);
+        }
+        row.dataset.lastOrderType = orderType;
+    }
+
+    if (orderType === 'Piece') {
+        ppbInput.value = '1';
+        ppb = 1;
+        ppbInput.readOnly = true;
+        if (changedField === 'unit') {
+            piecePrice = unitPrice;
+        } else {
+            unitPrice = piecePrice;
+            unitPriceInput.value = piecePrice.toFixed(2);
+        }
+    } else {
+        ppbInput.readOnly = false;
+        if (changedField === 'unit') {
+            piecePrice = ppb > 0 ? unitPrice / ppb : unitPrice;
+        } else if (changedField === 'ppb' || parseInt(row.dataset.bundlePpb || ppb, 10) !== ppb) {
+            unitPrice = piecePrice * ppb;
+            unitPriceInput.value = unitPrice.toFixed(2);
+        }
+    }
+
+    row.dataset.piecePrice = piecePrice.toFixed(2);
+    row.dataset.bundlePpb = String(ppb);
+    row.dataset.bundleUnitPrice = unitPrice.toFixed(2);
+    const priceCaption = row.querySelector('.item-price-caption');
+    if (priceCaption) {
+        priceCaption.textContent = orderType === 'Bundle'
+            ? 'Piece: ₹' + piecePrice.toFixed(2)
+            : 'Piece Price';
+    }
 
     const totalPcs = (orderType === 'Bundle') ? (qty * ppb) : qty;
     const lineTotal = Math.max(0, (unitPrice * qty) - disc);
@@ -1817,6 +1923,30 @@ function escapeHtml(text) {
 
 // Initial calculation on page load
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.quotation-item-row').forEach(row => {
+        const orderTypeSelect = row.querySelector('.item-order-type');
+        const ppbInput = row.querySelector('.item-ppb');
+        const unitPriceInput = row.querySelector('.item-unit-price');
+        if (!orderTypeSelect || !ppbInput || !unitPriceInput) return;
+
+        const initialOrderType = orderTypeSelect.value;
+        const initialPpb = Math.max(1, parseInt(ppbInput.value || 1, 10));
+        const initialUnitPrice = Math.max(0, parseFloat(unitPriceInput.value || 0));
+
+        row.dataset.lastOrderType = initialOrderType;
+        row.dataset.bundlePpb = String(initialOrderType === 'Piece' ? 1 : initialPpb);
+        row.dataset.bundleUnitPrice = initialUnitPrice.toFixed(2);
+        row.dataset.piecePrice = (initialOrderType === 'Piece'
+            ? initialUnitPrice
+            : (initialPpb > 0 ? initialUnitPrice / initialPpb : initialUnitPrice)).toFixed(2);
+
+        if (initialOrderType === 'Piece') {
+            ppbInput.value = '1';
+            ppbInput.readOnly = true;
+        }
+        recalcRow(orderTypeSelect);
+
+    });
     recalcAll();
 });
 </script>

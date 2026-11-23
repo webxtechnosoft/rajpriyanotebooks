@@ -270,6 +270,84 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Auto-fill the district headquarters pincode in address forms.
+// District pincodes can represent more than one delivery location, so the
+// customer can still edit the pincode when needed.
+const tamilNaduDistrictPincodes = {
+    'ariyalur': '621704',
+    'chengalpattu': '603001',
+    'chennai': '600001',
+    'coimbatore': '641001',
+    'cuddalore': '607001',
+    'dharmapuri': '636701',
+    'dindigul': '624001',
+    'erode': '638001',
+    'kallakurichi': '606202',
+    'kancheepuram': '631501',
+    'kanyakumari': '629001',
+    'kanniyakumari': '629001',
+    'karur': '639001',
+    'krishnagiri': '635001',
+    'madurai': '625001',
+    'mayiladuthurai': '609001',
+    'nagapattinam': '611001',
+    'namakkal': '637001',
+    'nilgiris': '643001',
+    'ooty': '643001',
+    'perambalur': '621212',
+    'pudukkottai': '622001',
+    'ramanathapuram': '623501',
+    'ranipet': '632401',
+    'salem': '636001',
+    'sivaganga': '630561',
+    'tenkasi': '627811',
+    'thanjavur': '613001',
+    'theni': '625531',
+    'thoothukudi': '628001',
+    'tiruchirappalli': '620001',
+    'trichy': '620001',
+    'tirunelveli': '627001',
+    'tirupathur': '635601',
+    'tiruppur': '641601',
+    'tiruvallur': '602001',
+    'tiruvannamalai': '606601',
+    'tiruvarur': '610001',
+    'vellore': '632001',
+    'villupuram': '605602',
+    'virudhunagar': '626001'
+};
+
+function normalizeDistrictName(value) {
+    return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '');
+}
+
+document.querySelectorAll('input[name="district"]').forEach(function(field) {
+    const form = field.closest('form') || document;
+    const districtField = form.querySelector('input[name="district"]');
+    const pincodeField = form.querySelector('input[name="pincode"]');
+    if (!districtField || !pincodeField) return;
+
+    const applyDistrictPincode = function() {
+        const districtKey = normalizeDistrictName(districtField.value);
+        const pincode = tamilNaduDistrictPincodes[districtKey];
+        if (!pincode) return;
+
+        if (!pincodeField.value || pincodeField.dataset.autoDistrictPincode === pincodeField.value) {
+            pincodeField.value = pincode;
+            pincodeField.dataset.autoDistrictPincode = pincode;
+            pincodeField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    districtField.addEventListener('input', applyDistrictPincode);
+    districtField.addEventListener('change', applyDistrictPincode);
+    districtField.addEventListener('blur', applyDistrictPincode);
+    applyDistrictPincode();
+});
+
 // Toggle Pagination Menu (Req 2)
 function togglePaginationMenu(btn) {
     if (!btn) return;

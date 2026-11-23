@@ -590,7 +590,7 @@ if (!empty($orders)) {
                 <th>Notebook &amp; Variety</th>
                 <th class="text-center" style="width: 105px;">Product Code</th>
                 <th class="text-center" style="width: 95px;">Pcs / Bdl</th>
-                <th class="text-center" style="width: 100px;">Bundles</th>
+                <th class="text-center" style="width: 100px;">Qty</th>
                 <th class="text-center" style="width: 110px;">Total Pieces</th>
                 <th class="text-end" style="width: 95px;">Price</th>
                 <th class="text-end" style="width: 110px;">Total</th>
@@ -623,7 +623,7 @@ if (!empty($orders)) {
                   </td>
                   <td class="text-center"><code class="fw-bold text-navy" style="font-size: 0.825rem;"><?php echo htmlspecialchars($itemCode ?: '-'); ?></code></td>
                   <td class="text-center small text-muted"><?php echo $isBundle ? ($ppb . ' Pcs') : '1 (Loose)'; ?></td>
-                  <td class="text-center fw-bold text-navy"><?php echo $isBundle ? $qty : '&mdash;'; ?></td>
+                  <td class="text-center fw-bold text-navy"><?php echo $qty; ?></td>
                   <td class="text-center fw-bold">
                     <span class="badge <?php echo $isBundle ? 'bg-gold text-navy' : 'bg-light text-dark border'; ?> fs-7">
                       <?php echo $totalPieces; ?> Pcs

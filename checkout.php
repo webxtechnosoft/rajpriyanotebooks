@@ -446,7 +446,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">District <span class="text-danger">*</span></label>
-                  <input type="text" name="district" class="form-control" required value="<?php echo htmlspecialchars($_POST['district'] ?? ($current_customer['district'] ?? '')); ?>" placeholder="e.g. Madurai">
+                  <input type="text" id="checkoutDistrict" name="district" class="form-control" required value="<?php echo htmlspecialchars($_POST['district'] ?? ($current_customer['district'] ?? '')); ?>" placeholder="e.g. Madurai">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">State <span class="text-danger">*</span></label>
@@ -454,7 +454,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">Pincode <span class="text-danger">*</span></label>
-                  <input type="text" name="pincode" class="form-control" required pattern="[0-9]{6}" title="6-digit pincode" value="<?php echo htmlspecialchars($_POST['pincode'] ?? ($current_customer['pincode'] ?? '')); ?>" placeholder="625001">
+                  <input type="text" id="checkoutPincode" name="pincode" class="form-control" required pattern="[0-9]{6}" title="6-digit pincode" value="<?php echo htmlspecialchars($_POST['pincode'] ?? ($current_customer['pincode'] ?? '')); ?>" placeholder="625001">
                 </div>
                 <div class="col-md-12">
                   <label class="form-label small fw-semibold">Landmark <span class="text-muted fw-normal">(Optional)</span></label>

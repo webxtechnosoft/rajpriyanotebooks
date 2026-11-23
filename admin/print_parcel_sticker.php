@@ -708,6 +708,16 @@ $catalogue_qr_image = generate_qr_code_image_url($catalogue_url, 180);
       border: 1.5px solid #D97706;
     }
 
+    .pl-badge-bundles .pl-badge-label {
+      font-size: 12px;
+      letter-spacing: 0.4px;
+    }
+
+    .pl-badge-bundles .pl-mini-val {
+      font-size: 28px;
+      line-height: 1;
+    }
+
     .pl-mini-icon-red {
       color: #E11D48;
       font-size: 24px;
@@ -1203,7 +1213,7 @@ $catalogue_qr_image = generate_qr_code_image_url($catalogue_url, 180);
                   <td style="text-align: center; font-weight: 700;"><?php echo htmlspecialchars($row['pages']); ?></td>
                   <td style="text-align: center; font-weight: 700; font-size: 10.5px;"><?php echo htmlspecialchars($row['variety']); ?></td>
                   <td style="text-align: center; font-weight: 700; font-size: 10.5px;"><?php echo htmlspecialchars($row['pack']); ?></td>
-                  <td style="text-align: center; font-weight: 900; font-size: 12.5px;"><?php echo (int)$row['bundles']; ?></td>
+                  <td style="text-align: center; font-weight: 900; font-size: 16px;"><?php echo (int)$row['bundles']; ?></td>
                   <td style="text-align: right; font-weight: 900; font-size: 12px; padding-right: 8px;">
                     <?php echo number_format($row['total_pieces']); ?>
                   </td>
@@ -1214,7 +1224,7 @@ $catalogue_qr_image = generate_qr_code_image_url($catalogue_url, 180);
           <tfoot>
             <tr class="pl-table-footer-row">
               <td colspan="6" style="text-align: center; letter-spacing: 1px; font-weight: 900;">TOTAL</td>
-              <td style="text-align: center; font-weight: 900; font-size: 13px;"><?php echo (int)$totalBundles; ?></td>
+              <td style="text-align: center; font-weight: 900; font-size: 20px;"><?php echo (int)$totalBundles; ?></td>
               <td style="text-align: right; font-weight: 900; font-size: 13px; padding-right: 8px;">
                 <?php echo number_format($totalNOS); ?>
               </td>

@@ -175,7 +175,8 @@ function delete_product_record($db, $productId) {
     $db->prepare("DELETE FROM reviews WHERE product_id = ?")->execute([$productId]);
     $db->prepare("DELETE FROM stock_history WHERE product_id = ?")->execute([$productId]);
     $db->prepare("UPDATE ai_designs SET created_product_id = NULL WHERE created_product_id = ?")->execute([$productId]);
-    $db->prepare("UPDATE order_items SET product_id = NULL WHERE product_id = ?")->execute([$productId]);
+    $db->prepare("UPDATE order_items SET product_id = NULL, variant_id = NULL WHERE product_id = ?")->execute([$productId]);
+    $db->prepare("UPDATE quotation_items SET product_id = NULL, variant_id = NULL WHERE product_id = ?")->execute([$productId]);
 
     $stmtDel = $db->prepare("DELETE FROM products WHERE id = ?");
     $stmtDel->execute([$productId]);
@@ -223,7 +224,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'bulk_
         $db->prepare("DELETE FROM reviews WHERE product_id IN (SELECT id FROM products)")->execute();
         $db->prepare("DELETE FROM stock_history WHERE product_id IN (SELECT id FROM products)")->execute();
         $db->prepare("UPDATE ai_designs SET created_product_id = NULL WHERE created_product_id IN (SELECT id FROM products)")->execute();
-        $db->prepare("UPDATE order_items SET product_id = NULL WHERE product_id IN (SELECT id FROM products)")->execute();
+        $db->prepare("UPDATE order_items SET product_id = NULL, variant_id = NULL WHERE product_id IN (SELECT id FROM products)")->execute();
+        $db->prepare("UPDATE quotation_items SET product_id = NULL, variant_id = NULL WHERE product_id IN (SELECT id FROM products)")->execute();
         $deletedCount = $db->exec("DELETE FROM products");
         $db->commit();
         set_flash('success', $deletedCount . ' product(s) and their related catalogue data were permanently deleted. Past orders were preserved.');

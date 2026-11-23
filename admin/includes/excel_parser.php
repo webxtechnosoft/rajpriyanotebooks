@@ -1114,6 +1114,26 @@ function execute_flat_product_import($db, $token) {
             throw new RuntimeException('The uploaded file did not produce any valid products; the catalogue was not replaced.');
         }
         $retainedIds = array_values($retainedProductIds);
+        $removedIdsStmt = $db->prepare(
+            'SELECT id FROM products WHERE id NOT IN (' .
+            implode(', ', array_fill(0, count($retainedIds), '?')) .
+            ')'
+        );
+        $removedIdsStmt->execute($retainedIds);
+        $removedIds = array_map('intval', $removedIdsStmt->fetchAll(PDO::FETCH_COLUMN));
+
+        if (!empty($removedIds)) {
+            $removedPlaceholders = implode(', ', array_fill(0, count($removedIds), '?'));
+            $db->prepare("DELETE FROM product_variants WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("DELETE FROM product_images WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("DELETE FROM cart_items WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("DELETE FROM reviews WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("DELETE FROM stock_history WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("UPDATE ai_designs SET created_product_id = NULL WHERE created_product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("UPDATE order_items SET product_id = NULL, variant_id = NULL WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+            $db->prepare("UPDATE quotation_items SET product_id = NULL, variant_id = NULL WHERE product_id IN ($removedPlaceholders)")->execute($removedIds);
+        }
+
         $deleteSql = 'DELETE FROM products WHERE id NOT IN (' . implode(', ', array_fill(0, count($retainedIds), '?')) . ')';
         $deleteStmt = $db->prepare($deleteSql);
         $deleteStmt->execute($retainedIds);

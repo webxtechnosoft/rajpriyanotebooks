@@ -201,7 +201,7 @@ function render_customer_tax_invoice_block($order, $order_items, $logos, $order_
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 8px; vertical-align: middle; line-height: 1.25;">Notebook Item &amp; Variety</th>
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 100px; text-align: center; vertical-align: middle;">Product Code</th>
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: center; vertical-align: middle;">Pcs / Bundle</th>
-        <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 75px; text-align: center; vertical-align: middle;">Bundles</th>
+        <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 75px; text-align: center; vertical-align: middle;">Qty</th>
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: center; vertical-align: middle;">Total Pieces</th>
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: right; vertical-align: middle;">Unit Price</th>
         <th style="background: #17243A; color: #FFFFFF; border: 1px solid #17243A; padding: 7px 6px; width: 95px; text-align: right; vertical-align: middle;">Total Price</th>
@@ -239,7 +239,7 @@ function render_customer_tax_invoice_block($order, $order_items, $logos, $order_
             <?php echo $itmIsBundle ? ($itmPpb . ' Pcs') : '1 (Loose)'; ?>
           </td>
           <td style="border: 1px solid #CBD5E1; padding: 7px 8px; text-align: center; vertical-align: middle; font-weight: 700; color: #17243A; font-size: 0.88rem;">
-            <?php echo $itmIsBundle ? $itmQty : '&mdash;'; ?>
+            <?php echo $itmQty; ?>
           </td>
           <td style="border: 1px solid #CBD5E1; padding: 7px 8px; text-align: center; vertical-align: middle; font-weight: 700; color: #0F172A; font-size: 0.88rem; background: #F8FAFC;">
             <?php echo $itmTotalPieces; ?> Pcs
@@ -882,7 +882,7 @@ require_once __DIR__ . '/includes/header.php';
             <tr>
               <th class="align-middle">Notebook Item &amp; Specifications</th>
               <th class="text-center align-middle" style="width: 105px; font-size: 0.78rem; text-transform: uppercase;">Pcs / Bundle</th>
-              <th class="text-center align-middle" style="width: 110px; font-size: 0.78rem; text-transform: uppercase;">Bundles Ordered</th>
+              <th class="text-center align-middle" style="width: 110px; font-size: 0.78rem; text-transform: uppercase;">Qty</th>
               <th class="text-center align-middle" style="width: 115px; font-size: 0.78rem; text-transform: uppercase;">Total Pieces</th>
               <th class="text-end align-middle" style="width: 115px; font-size: 0.78rem; text-transform: uppercase;">Unit Price</th>
               <th class="text-end align-middle" style="width: 125px; font-size: 0.78rem; text-transform: uppercase;">Total Price</th>
@@ -927,7 +927,7 @@ require_once __DIR__ . '/includes/header.php';
                   <?php echo $isBundle ? ($ppb . ' Pcs') : '1 (Loose)'; ?>
                 </td>
                 <td class="text-center align-middle fw-bold text-navy fs-6">
-                  <?php echo $isBundle ? ($qty . ' ' . ($qty > 1 ? 'Bundles' : 'Bundle')) : '&mdash;'; ?>
+                  <?php echo $qty; ?>
                 </td>
                 <td class="text-center align-middle fw-bold fs-6">
                   <span class="badge <?php echo $isBundle ? 'bg-gold-subtle text-navy border border-warning-subtle' : 'bg-light text-dark border'; ?> px-2.5 py-1.5 fs-7">

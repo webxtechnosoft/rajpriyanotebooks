@@ -124,7 +124,7 @@ require_once __DIR__ . '/includes/header.php';
                 <th>Product &amp; Variety</th>
                 <th class="text-center" style="width: 100px;">Code</th>
                 <th class="text-center" style="width: 95px;">Pcs / Bdl</th>
-                <th class="text-center" style="width: 95px;">Bundles</th>
+                <th class="text-center" style="width: 95px;">Qty</th>
                 <th class="text-center" style="width: 105px;">Total Pieces</th>
                 <th class="text-end" style="width: 95px;">Price</th>
                 <th class="text-end" style="width: 110px;">Total</th>
@@ -154,7 +154,7 @@ require_once __DIR__ . '/includes/header.php';
                   </td>
                   <td class="text-center font-monospace small fw-bold text-navy"><?php echo htmlspecialchars($itemCode ?: '-'); ?></td>
                   <td class="text-center small text-muted"><?php echo $isBundle ? ($ppb . ' Pcs') : '1 (Loose)'; ?></td>
-                  <td class="text-center fw-bold text-navy"><?php echo $isBundle ? $qty : '&mdash;'; ?></td>
+                  <td class="text-center fw-bold text-navy"><?php echo $qty; ?></td>
                   <td class="text-center fw-bold">
                     <span class="badge <?php echo $isBundle ? 'bg-gold text-navy' : 'bg-light text-dark border'; ?> fs-7">
                       <?php echo $totalPieces; ?> Pcs
@@ -435,7 +435,7 @@ require_once __DIR__ . '/includes/header.php';
         <th style="border: 1px solid #17243A; padding: 7px 8px;">Notebook Item &amp; Variety</th>
         <th style="border: 1px solid #17243A; padding: 7px 6px; width: 100px; text-align: center;">Product Code</th>
         <th style="border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: center;">Pcs / Bdl</th>
-        <th style="border: 1px solid #17243A; padding: 7px 6px; width: 75px; text-align: center;">Bundles</th>
+        <th style="border: 1px solid #17243A; padding: 7px 6px; width: 75px; text-align: center;">Qty</th>
         <th style="border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: center;">Total Pieces</th>
         <th style="border: 1px solid #17243A; padding: 7px 6px; width: 85px; text-align: right;">Unit Price</th>
         <th style="border: 1px solid #17243A; padding: 7px 6px; width: 95px; text-align: right;">Total Price</th>
@@ -468,7 +468,7 @@ require_once __DIR__ . '/includes/header.php';
           </td>
           <td style="border: 1px solid #CBD5E1; padding: 6px 8px; font-family: monospace; font-weight: 700; color: #17243A; text-align: center;"><?php echo htmlspecialchars($itemCode ?: '-'); ?></td>
           <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: center; color: #475569;"><?php echo $isBundle ? ($ppb . ' Pcs') : '1 (Loose)'; ?></td>
-          <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: center; font-weight: 700; color: #17243A;"><?php echo $isBundle ? $qty : '&mdash;'; ?></td>
+          <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: center; font-weight: 700; color: #17243A;"><?php echo $qty; ?></td>
           <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: center; font-weight: 700; color: #0F172A; background: #F8FAFC;"><?php echo $totalPieces; ?> Pcs</td>
           <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: right;"><?php echo format_price($itm['price']); ?></td>
           <td style="border: 1px solid #CBD5E1; padding: 6px 8px; text-align: right; font-weight: 700; color: #17243A;"><?php echo format_price($itm['total_price']); ?></td>
