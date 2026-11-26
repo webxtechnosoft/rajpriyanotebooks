@@ -57,6 +57,7 @@ if ($action === 'template') {
         'Variant Regular Price',
         'Variant Sale Price',
         'Variant GST Rate',
+        'Variant Basic Price',
         'Variant Selling Price',
         'Variant Discounted Price'
     ]);
@@ -71,7 +72,7 @@ if ($action === 'template') {
     $sampleProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $sampleVariantStmt = $db->prepare("SELECT id, product_code, page_count, variety, variety_display,
         bundle_qty, bundle_stock, loose_stock, stock, mrp, price, sale_price, gst_rate,
-        selling_price, discounted_price
+        basic_price, selling_price, discounted_price
         FROM product_variants WHERE product_id = ? ORDER BY id ASC");
 
     foreach ($sampleProducts as $p) {
@@ -102,7 +103,7 @@ if ($action === 'template') {
             $v['id'], $v['product_code'], $v['variety'], $v['variety_display'],
             $v['page_count'], $v['bundle_qty'], $v['bundle_stock'], $v['loose_stock'],
             $v['stock'], $v['mrp'], $v['price'], $v['sale_price'], $v['gst_rate'],
-            $v['selling_price'], $v['discounted_price']
+            $v['basic_price'], $v['selling_price'], $v['discounted_price']
             ]);
         }
     }
@@ -128,7 +129,7 @@ if ($action === 'export') {
     // remains in its own Excel cell.
     $variantStmt = $db->prepare("SELECT id, product_code, page_count, variety, variety_display,
         bundle_qty, bundle_stock, loose_stock, stock, mrp, price, sale_price, gst_rate,
-        selling_price, discounted_price
+        basic_price, selling_price, discounted_price
         FROM product_variants WHERE product_id = ? ORDER BY id ASC");
 
     header('Content-Type: text/csv; charset=utf-8');
@@ -175,6 +176,7 @@ if ($action === 'export') {
         'Variant Regular Price',
         'Variant Sale Price',
         'Variant GST Rate',
+        'Variant Basic Price',
         'Variant Selling Price',
         'Variant Discounted Price'
     ]);
@@ -211,7 +213,7 @@ if ($action === 'export') {
             $v['id'], $v['product_code'], $v['variety'], $v['variety_display'],
             $v['page_count'], $v['bundle_qty'], $v['bundle_stock'], $v['loose_stock'],
             $v['stock'], $v['mrp'], $v['price'], $v['sale_price'], $v['gst_rate'],
-            $v['selling_price'], $v['discounted_price']
+            $v['basic_price'], $v['selling_price'], $v['discounted_price']
             ]);
         }
     }

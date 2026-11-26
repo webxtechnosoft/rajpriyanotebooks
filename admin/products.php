@@ -110,7 +110,7 @@ if (isset($_GET['action'])) {
             $variantStmt = $db->prepare("
                 SELECT id, product_code, page_count, variety, variety_display,
                        bundle_qty, bundle_stock, loose_stock, stock,
-                       mrp, price, sale_price, gst_rate, selling_price, discounted_price
+                       mrp, price, sale_price, gst_rate, basic_price, selling_price, discounted_price
                 FROM product_variants
                 WHERE product_id = ?
                 ORDER BY id
@@ -134,6 +134,7 @@ if (isset($_GET['action'])) {
                         'price' => null,
                         'sale_price' => null,
                         'gst_rate' => null,
+                        'basic_price' => null,
                         'selling_price' => null,
                         'discounted_price' => null,
                         'effective_price' => get_product_single_piece_price($prod, $varietyLabel)
@@ -1865,7 +1866,7 @@ function submitRenameBrand(event) {
                       <span>Product Varieties, Individual Pricing &amp; Bundle Stock</span>
                     </h6>
                     <div class="small text-muted mt-0.5">
-                      Each variety maintains its own bundle count, stock, MRP, GST, selling price, and discount.
+                      Each variety maintains its own bundle count, stock, MRP, GST, basic price, and discount.
                     </div>
                   </div>
                   <button type="button" class="btn btn-sm text-white fw-semibold px-3 shadow-xs" style="background-color: #0F2C59;" onclick="addProductVariantRow()">
@@ -1886,8 +1887,8 @@ function submitRenameBrand(event) {
                         <th style="width: 7%;" class="text-center text-success" title="Total pieces = (Bundles × Bundle Count) + Loose Pcs">Total Stock</th>
                         <th style="width: 6%;" title="Maximum retail price per piece">MRP (₹)</th>
                         <th style="width: 7%;" title="Calculated as half of MRP">Sale (₹)</th>
-                        <th style="width: 5%;" title="GST percentage; blank inherits product GST">GST (%)</th>
-                        <th style="width: 7%;" title="Sale price including GST">Sell Price (₹)</th>
+                        <th style="width: 5%;" title="GST percentage; blank uses 0%">GST (%)</th>
+                        <th style="width: 7%;" title="Sale price excluding GST (Sale divided by 1 plus GST)">Basic Price (₹)</th>
                         <th style="width: 6%;" title="Discount percentage">Discount (%)</th>
                         <th style="width: 7%;" title="Final price after discount, including GST">Disc Price (₹)</th>
                         <th style="width: 9%;">SKU / Code</th>
@@ -1910,7 +1911,7 @@ function submitRenameBrand(event) {
                 </div>
 
                 <div class="form-text small text-muted mt-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                  <span><i class="bi bi-info-circle me-1 text-primary"></i> Sale Price is half of MRP; Sell Price includes GST.</span>
+                  <span><i class="bi bi-info-circle me-1 text-primary"></i> Sale Price is half of MRP; Basic Price excludes GST.</span>
                   <span class="badge bg-light text-dark border"><i class="bi bi-arrow-repeat me-1 text-success"></i> Stock and totals auto-calculate in real time</span>
                 </div>
               </div>
@@ -2313,13 +2314,13 @@ function appendProductVariantRow(variant) {
       <input type="number" name="variants[${index}][mrp]" class="form-control form-control-sm text-end" min="0.01" step="0.01" placeholder="Optional" value="${row.mrp == null ? '' : escapeHtml(row.mrp)}" title="Maximum retail price per piece">
     </td>
     <td>
-      <input type="number" name="variants[${index}][sale_price]" class="form-control form-control-sm text-end js-variant-sale-price" min="0.01" step="0.01" readonly value="${row.sale_price == null ? (row.price == null ? '' : escapeHtml(row.price)) : escapeHtml(row.sale_price)}" title="Calculated as half of MRP">
+      <input type="number" name="variants[${index}][sale_price]" class="form-control form-control-sm text-end js-variant-sale-price" min="0.01" step="0.01" value="${row.sale_price == null ? (row.price == null ? '' : escapeHtml(row.price)) : escapeHtml(row.sale_price)}" title="Defaults to half of MRP; can be adjusted">
     </td>
     <td>
-      <input type="number" name="variants[${index}][gst_rate]" class="form-control form-control-sm text-end js-variant-gst-rate" min="0" max="100" step="0.01" placeholder="18" value="${row.gst_rate == null ? '' : escapeHtml(row.gst_rate)}" title="GST percentage; blank uses 18%">
+      <input type="number" name="variants[${index}][gst_rate]" class="form-control form-control-sm text-end js-variant-gst-rate" min="0" max="100" step="0.01" placeholder="0" value="${row.gst_rate == null ? '' : escapeHtml(row.gst_rate)}" title="GST percentage; blank uses 0%">
     </td>
     <td>
-      <input type="number" class="form-control form-control-sm text-end js-variant-sell-price" readonly title="Sale price including GST">
+      <input type="number" name="variants[${index}][basic_price]" class="form-control form-control-sm text-end js-variant-basic-price" readonly title="Sale price excluding GST">
     </td>
     <td>
       <input type="number" name="variants[${index}][discount_percent]" class="form-control form-control-sm text-end js-variant-discount-percent" min="0" max="99.99" step="0.01" placeholder="0" title="Discount percentage">
@@ -2354,44 +2355,52 @@ function appendProductVariantRow(variant) {
   const mrpInput = tr.querySelector('input[name$="[mrp]"]');
   const salePriceInput = tr.querySelector('.js-variant-sale-price');
   const gstRateInput = tr.querySelector('.js-variant-gst-rate');
-  const sellPriceInput = tr.querySelector('.js-variant-sell-price');
+  const basicPriceInput = tr.querySelector('.js-variant-basic-price');
   const discountPercentInput = tr.querySelector('.js-variant-discount-percent');
   const sellingPriceBaseInput = tr.querySelector('.js-variant-selling-price-base');
   const discountedPriceBaseInput = tr.querySelector('.js-variant-discounted-price-base');
   const discountedPriceInput = tr.querySelector('.js-variant-discounted-price');
   const originalSalePrice = parseFloat(row.sale_price || row.price) || 0;
-  const originalSellingPrice = parseFloat(row.selling_price) || 0;
   const originalDiscountedPrice = parseFloat(row.discounted_price) || 0;
   if (originalDiscountedPrice > 0 && originalSalePrice > 0) {
-    discountPercentInput.value = Math.max(0, Math.min(100,
+    discountPercentInput.value = Math.max(0, Math.min(99.99,
       (1 - (originalDiscountedPrice / originalSalePrice)) * 100
     )).toFixed(2).replace(/\.?0+$/, '');
   }
 
-  const recalculatePrices = function() {
+  const recalculatePrices = function(updateSaleFromMrp = false) {
     const mrp = parseFloat(mrpInput.value) || 0;
-    const salePrice = mrp > 0 ? Math.round((mrp / 2) * 100) / 100 : originalSalePrice;
-    const gstRate = gstRateInput.value === '' ? 18 : Math.max(0, parseFloat(gstRateInput.value) || 0);
-    const discountPercent = Math.max(0, Math.min(99.99, parseFloat(discountPercentInput.value) || 0));
-    const sellPrice = salePrice > 0
-      ? Math.round(salePrice * (1 + gstRate / 100) * 100) / 100
-      : (originalSellingPrice > 0 ? originalSellingPrice : 0);
-    const discountedBasePrice = salePrice > 0
-      ? Math.round(salePrice * (1 - discountPercent / 100) * 100) / 100
-      : 0;
-    const discountedSellPrice = discountedBasePrice > 0
-      ? Math.round(discountedBasePrice * (1 + gstRate / 100) * 100) / 100
-      : 0;
+    if (updateSaleFromMrp) {
+      salePriceInput.value = mrp > 0 ? (Math.round((mrp / 2) * 100) / 100).toFixed(2) : '';
+    }
 
-    salePriceInput.value = salePrice > 0 ? salePrice.toFixed(2) : '';
-    sellPriceInput.value = sellPrice > 0 ? sellPrice.toFixed(2) : '';
-    sellingPriceBaseInput.value = salePrice > 0 ? sellPrice.toFixed(2) : '';
-    discountedPriceInput.value = discountedSellPrice > 0 ? discountedSellPrice.toFixed(2) : '';
-    discountedPriceBaseInput.value = discountPercent > 0 && salePrice > 0
-      ? discountedBasePrice.toFixed(2)
-      : '';
+    const salePrice = parseFloat(salePriceInput.value);
+    const gstRate = gstRateInput.value === '' ? 0 : parseFloat(gstRateInput.value);
+    const discountPercent = discountPercentInput.value === '' ? 0 : parseFloat(discountPercentInput.value);
+    const validSale = Number.isFinite(salePrice) && salePrice > 0;
+    const validGst = Number.isFinite(gstRate) && gstRate >= 0 && gstRate <= 100;
+    const validDiscount = Number.isFinite(discountPercent) && discountPercent >= 0 && discountPercent < 100;
+
+    if (!validSale || !validGst || !validDiscount) {
+      basicPriceInput.value = '';
+      sellingPriceBaseInput.value = '';
+      discountedPriceInput.value = '';
+      discountedPriceBaseInput.value = '';
+      return;
+    }
+
+    const gstMultiplier = 1 + gstRate / 100;
+    const basicPrice = Math.round((salePrice / gstMultiplier) * 100) / 100;
+    const discountedBasicPrice = Math.round((basicPrice * (1 - discountPercent / 100)) * 100) / 100;
+    const discountedSalePrice = Math.round((discountedBasicPrice * gstMultiplier) * 100) / 100;
+
+    basicPriceInput.value = basicPrice.toFixed(2);
+    sellingPriceBaseInput.value = salePrice.toFixed(2);
+    discountedPriceInput.value = discountPercent > 0 ? discountedSalePrice.toFixed(2) : '';
+    discountedPriceBaseInput.value = discountPercent > 0 ? discountedSalePrice.toFixed(2) : '';
   };
-  mrpInput.addEventListener('input', recalculatePrices);
+  mrpInput.addEventListener('input', function() { recalculatePrices(true); });
+  salePriceInput.addEventListener('input', recalculatePrices);
   gstRateInput.addEventListener('input', recalculatePrices);
   discountPercentInput.addEventListener('input', recalculatePrices);
   recalculatePrices();
@@ -2427,6 +2436,7 @@ function addProductVariantRow() {
     price: null,
     sale_price: null,
     gst_rate: null,
+    basic_price: null,
     selling_price: null,
     discounted_price: null
   });

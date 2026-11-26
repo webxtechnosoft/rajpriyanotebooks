@@ -40,7 +40,7 @@ $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $variantStmt = $db->query("
     SELECT pv.id, pv.product_id, pv.variety, pv.variety_display, pv.mrp, pv.price,
-           pv.sale_price, pv.gst_rate, pv.selling_price, pv.discounted_price,
+           pv.sale_price, pv.gst_rate, pv.basic_price, pv.selling_price, pv.discounted_price,
            pv.stock, pv.bundle_stock
     FROM product_variants pv
     INNER JOIN products p ON p.id = pv.product_id
@@ -80,7 +80,9 @@ $makePriceRow = static function ($product, $variety, $variant = null, $priceType
         $sellingPrice = $sellingPrice ?? $positivePrice($product['selling_price_' . $priceType] ?? null);
     }
     if ($variant && $positivePrice($variant['discounted_price'] ?? null) !== null) {
-        $discountedPrice = round((float)$variant['discounted_price'] * (1 + $gstRate / 100), 2);
+        $discountedPrice = $positivePrice($variant['basic_price'] ?? null) !== null
+            ? (float)$variant['discounted_price']
+            : round((float)$variant['discounted_price'] * (1 + $gstRate / 100), 2);
     } elseif ($priceType !== '') {
         $discountedPrice = $positivePrice($product['discounted_price_' . $priceType] ?? null);
     }

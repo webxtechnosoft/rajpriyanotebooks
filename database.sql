@@ -298,6 +298,7 @@ CREATE TABLE `product_variants` (
   `price` decimal(10,2) DEFAULT NULL,
   `sale_price` decimal(10,2) DEFAULT NULL,
   `gst_rate` decimal(5,2) DEFAULT NULL,
+  `basic_price` decimal(10,2) DEFAULT NULL,
   `selling_price` decimal(10,2) DEFAULT NULL,
   `discounted_price` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),

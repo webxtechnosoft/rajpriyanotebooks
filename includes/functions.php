@@ -586,7 +586,7 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
 
     $existingStmt = $db->prepare("
         SELECT id, product_code, variety, variety_display, bundle_qty, bundle_stock, loose_stock, stock,
-               mrp, price, sale_price, gst_rate, selling_price, discounted_price
+               mrp, price, sale_price, gst_rate, basic_price, selling_price, discounted_price
         FROM product_variants
         WHERE product_id = ?
         ORDER BY id
@@ -682,16 +682,27 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
             $discountPercent = round((float)$discountPercentRaw, 2);
         }
 
-        $salePrice = $prices['mrp'] !== null
-            ? round($prices['mrp'] / 2, 2)
-            : ($prices['sale_price'] ?? ($id > 0 ? ($existingById[$id]['price'] ?? null) : null));
+        $salePrice = $prices['sale_price']
+            ?? ($prices['mrp'] !== null
+                ? round($prices['mrp'] / 2, 2)
+                : ($id > 0 ? ($existingById[$id]['price'] ?? null) : null));
         if ($salePrice !== null) {
             $prices['price'] = $salePrice;
             $prices['sale_price'] = $salePrice;
-            $prices['selling_price'] = round($salePrice * (1 + ($gstRate ?? 18) / 100), 2);
-            $prices['discounted_price'] = ($discountPercent !== null && $discountPercent > 0)
-                ? round($salePrice * (1 - $discountPercent / 100), 2)
+            $effectiveGstRate = $gstRate ?? 0;
+            $gstMultiplier = 1 + $effectiveGstRate / 100;
+            $prices['basic_price'] = round($salePrice / $gstMultiplier, 2);
+            $prices['selling_price'] = round($salePrice, 2);
+            $discountedBasicPrice = ($discountPercent !== null && $discountPercent > 0)
+                ? round($prices['basic_price'] * (1 - $discountPercent / 100), 2)
                 : null;
+            $prices['discounted_price'] = $discountedBasicPrice !== null
+                ? round($discountedBasicPrice * $gstMultiplier, 2)
+                : null;
+        } else {
+            $prices['basic_price'] = null;
+            $prices['selling_price'] = null;
+            $prices['discounted_price'] = null;
         }
 
         $bundleStockRaw = isset($row['bundle_stock']) ? trim((string)$row['bundle_stock']) : '';
@@ -714,6 +725,7 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
             'price' => $prices['price'],
             'sale_price' => $prices['sale_price'],
             'gst_rate' => $gstRate,
+            'basic_price' => $prices['basic_price'],
             'selling_price' => $prices['selling_price'],
             'discounted_price' => $prices['discounted_price'],
             'bundle_stock' => $submittedBundleStock,
@@ -798,6 +810,7 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
                 || (string)($oldRow['mrp'] ?? '') !== (string)($row['mrp'] ?? '')
                 || (string)($oldRow['price'] ?? '') !== (string)($row['price'] ?? '')
                 || (string)($oldRow['sale_price'] ?? '') !== (string)($row['sale_price'] ?? '')
+                || (string)($oldRow['basic_price'] ?? '') !== (string)($row['basic_price'] ?? '')
                 || (string)($oldRow['gst_rate'] ?? '') !== (string)($row['gst_rate'] ?? '');
             
             $storedBundleStock = max(0, (int)($oldRow['bundle_stock'] ?? 0));
@@ -832,13 +845,13 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
                 SET product_code = ?, page_count = ?, variety = ?, variety_display = ?,
                     bundle_qty = ?, bundle_stock = ?, loose_stock = ?, stock = ?,
                     mrp = ?, price = ?, sale_price = ?, gst_rate = ?,
-                    selling_price = ?, discounted_price = ?, updated_at = NOW()
+                    basic_price = ?, selling_price = ?, discounted_price = ?, updated_at = NOW()
                 WHERE id = ? AND product_id = ?
             ")->execute([
                 $newProductCode, $pages, $row['variety'], $row['variety_display'],
                 $variantBundleQty, $effectiveBundleStock, $effectiveLooseStock,
                 $effectiveTotalPieces, $row['mrp'], $row['price'], $row['sale_price'],
-                $row['gst_rate'], $row['selling_price'], $row['discounted_price'],
+                $row['gst_rate'], $row['basic_price'], $row['selling_price'], $row['discounted_price'],
                 $row['id'], $product_id
             ]);
 
@@ -983,13 +996,13 @@ function save_product_variant_records($db, $product_id, $sku, $pages, $std_qty, 
                 INSERT INTO product_variants
                     (product_id, product_code, page_count, variety, variety_display,
                      bundle_qty, bundle_stock, loose_stock, stock, mrp, price, sale_price, gst_rate,
-                     selling_price, discounted_price)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     basic_price, selling_price, discounted_price)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ")->execute([
                 $product_id, $productCode, $pages, $row['variety'], $row['variety_display'],
                 $row['bundle_qty'], $stockBreakdown['bundle_stock'], $stockBreakdown['loose_stock'],
                 $stockPieces, $row['mrp'], $row['price'], $row['sale_price'], $row['gst_rate'],
-                $row['selling_price'], $row['discounted_price']
+                $row['basic_price'], $row['selling_price'], $row['discounted_price']
             ]);
 
             if ($stockPieces > 0) {

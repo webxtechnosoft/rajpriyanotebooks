@@ -10,3 +10,5 @@ RAJPRIYA NOTEBOOKS - CLEAN PACKAGE NOTES
 Confirmed bundle size: POWER 60-page variants use 400 pieces per bundle (product std_qty = 400). Stock quantities were not recalculated or overwritten.
 
 To add per-variety MRP, Regular Price, Sale Price, and GST Rate to an existing database, run `php migrate_product_variant_mrp.php` from the project directory. Fresh installs already include these columns in database.sql. Leave per-variety values blank to inherit product-level pricing and GST.
+
+To add the per-variety Basic Price field to an existing database, run `php migrate_product_variant_basic_price.php` from the project directory. This additive migration preserves existing variant data; fresh installs include the column in database.sql.
