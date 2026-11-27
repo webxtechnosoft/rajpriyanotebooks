@@ -235,8 +235,8 @@ if ($download) {
             <td style="vertical-align: middle;">
                 <div style="font-weight: bold; color: #1E293B;">' . htmlspecialchars($varietyDisplay) . '</div>
             </td>
-            <td style="text-align: center; color: #334155; font-weight: bold; vertical-align: middle;">' . number_format($stdQty) . ' pcs</td>
             <td style="text-align: center; color: #334155; font-weight: bold; vertical-align: middle;">' . (!empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span style="color: #94A3B8;">—</span>') . '</td>
+            <td style="text-align: center; color: #334155; font-weight: bold; vertical-align: middle;">' . number_format($stdQty) . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $mrpHtml . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $salePriceHtml . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $sellingPriceHtml . '</td>
@@ -353,9 +353,9 @@ if ($download) {
         <th style="width: 28px; text-align: center;">S.No.</th>
         <th style="width: 125px;">Product Name</th>
         <th style="width: 55px;">Brand</th>
+        <th style="width: 40px; text-align: center;">Pages</th>
         <th style="width: 130px;">Variety</th>
-        <th style="width: 55px; text-align: center;">Std. Quantity</th>
-        <th style="width: 40px; text-align: center;">Page Count</th>
+        <th style="width: 55px; text-align: center;">Std. Quantity / Bundle</th>
         <th style="width: 55px; text-align: right;">MRP</th>
         <th style="width: 58px; text-align: right;">Sale Price</th>
         <th style="width: 66px; text-align: right;">Sell Price</th>
@@ -619,9 +619,9 @@ require_once __DIR__ . '/includes/header.php';
             <th class="px-3">S.No.</th>
             <th class="px-3">Product Name</th>
             <th class="px-3">Brand</th>
+            <th class="px-3 text-center">Pages</th>
             <th class="px-3">Variety</th>
-            <th class="px-3 text-center">Std. Quantity</th>
-            <th class="px-3 text-center">Page Count</th>
+            <th class="px-3 text-center">Std. Quantity / Bundle</th>
             <th class="px-3 text-nowrap text-end">MRP</th>
             <th class="px-3 text-nowrap text-end">Sale Price</th>
             <th class="px-3 text-nowrap text-end">Sell Price</th>
@@ -652,11 +652,11 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="price-list-book-name fw-bold"><?php echo htmlspecialchars($product['name'] ?? ''); ?></div>
               </td>
               <td class="px-3 py-3 fw-bold text-dark"><?php echo !empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : '<span class="text-muted fw-normal">—</span>'; ?></td>
+              <td class="px-3 py-3 text-dark fw-bold text-center"><?php echo !empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span class="text-muted">—</span>'; ?></td>
               <td class="px-3 py-3">
                 <div class="fw-bold text-dark"><?php echo htmlspecialchars($varietyDisplay); ?></div>
               </td>
-              <td class="px-3 py-3 text-center fw-bold"><?php echo number_format($stdQty); ?> pcs / bundle</td>
-              <td class="px-3 py-3 text-dark fw-bold text-center"><?php echo !empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span class="text-muted">—</span>'; ?></td>
+              <td class="px-3 py-3 text-center fw-bold"><?php echo number_format($stdQty); ?></td>
               <td class="px-3 text-nowrap text-end price-list-price">
                 <?php echo $entry['mrp'] !== null ? format_price($entry['mrp']) : '<span class="text-muted">—</span>'; ?>
               </td>
