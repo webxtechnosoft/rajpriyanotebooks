@@ -41,7 +41,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $variantStmt = $db->query("
     SELECT pv.id, pv.product_id, pv.variety, pv.variety_display, pv.mrp, pv.price,
            pv.sale_price, pv.gst_rate, pv.basic_price, pv.selling_price, pv.discounted_price,
-           pv.stock, pv.bundle_stock
+           pv.stock, pv.bundle_stock, pv.bundle_qty
     FROM product_variants pv
     INNER JOIN products p ON p.id = pv.product_id
     WHERE p.active = 1
@@ -98,7 +98,8 @@ $makePriceRow = static function ($product, $variety, $variant = null, $priceType
         'selling_price' => $sellingPrice,
         'discounted_price' => $discountedPrice,
         'stock' => $variant ? (int)$variant['stock'] : (int)($product['stock'] ?? 0),
-        'bundle_stock' => $variant ? (int)$variant['bundle_stock'] : (int)($product['bundle_stock'] ?? 0)
+        'bundle_stock' => $variant ? (int)$variant['bundle_stock'] : (int)($product['bundle_stock'] ?? 0),
+        'std_qty' => $variant ? max(1, (int)($variant['bundle_qty'] ?? $product['std_qty'] ?? 1)) : max(1, (int)($product['std_qty'] ?? 1))
     ];
 };
 
@@ -194,8 +195,8 @@ if ($download) {
             $isAvailable = false;
         }
 
-        $sizeText = trim((string)($product['size'] ?? ''));
         $varietyDisplay = (string)$entry['variety_display'];
+        $stdQty = max(1, (int)$entry['std_qty']);
         $mrpHtml = $entry['mrp'] !== null
             ? format_price($entry['mrp'])
             : '<span style="color: #94A3B8;">—</span>';
@@ -211,8 +212,6 @@ if ($download) {
 
         $rowBg = ($index % 2 === 0) ? 'background-color: #F8FAFC;' : 'background-color: #FFFFFF;';
         $sNo = $index + 1;
-        $categoryHtml = !empty($product['category_name']) ? '<div style="font-size: 6.8pt; color: #64748B; margin-top: 1px;">' . htmlspecialchars($product['category_name']) . '</div>' : '';
-
         $badgeStyle = $isAvailable 
             ? 'background-color: #ECFDF5; color: #065F46; border: 0.5px solid #A7F3D0;' 
             : 'background-color: #FEF2F2; color: #991B1B; border: 0.5px solid #FECACA;';
@@ -221,16 +220,13 @@ if ($download) {
             <td style="text-align: center; color: #64748B; font-weight: 600;">' . $sNo . '</td>
             <td style="vertical-align: middle;">
                 <div style="font-weight: bold; color: #17243A; font-size: 7.8pt;">' . htmlspecialchars($product['name'] ?? '') . '</div>
-                ' . $categoryHtml . '
             </td>
-            <td style="color: #475569; vertical-align: middle;">' . (!empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : '<span style="color: #94A3B8;">—</span>') . '</td>
+            <td style="color: #17243A; font-weight: bold; vertical-align: middle;">' . (!empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : '<span style="color: #94A3B8; font-weight: normal;">—</span>') . '</td>
             <td style="vertical-align: middle;">
-                <div style="font-weight: 600; color: #1E293B;">' . htmlspecialchars($sizeText !== '' ? $sizeText : 'Standard') . '</div>
-                <div style="font-size: 6.8pt; color: #64748B; margin-top: 1.5px; line-height: 1.25;">
-                    <span style="font-weight: 600; color: #475569;">Variety:</span> ' . htmlspecialchars($varietyDisplay) . '
-                </div>
+                <div style="font-weight: bold; color: #1E293B;">' . htmlspecialchars($varietyDisplay) . '</div>
             </td>
-            <td style="text-align: center; color: #334155; font-weight: 600; vertical-align: middle;">' . (!empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span style="color: #94A3B8;">—</span>') . '</td>
+            <td style="text-align: center; color: #334155; font-weight: bold; vertical-align: middle;">' . number_format($stdQty) . ' pcs</td>
+            <td style="text-align: center; color: #334155; font-weight: bold; vertical-align: middle;">' . (!empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span style="color: #94A3B8;">—</span>') . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $mrpHtml . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $salePriceHtml . '</td>
             <td style="text-align: right; vertical-align: middle;">' . $sellingPriceHtml . '</td>
@@ -345,9 +341,10 @@ if ($download) {
     <thead>
       <tr>
         <th style="width: 28px; text-align: center;">S.No.</th>
-        <th style="width: 125px;">Book / Notebook Name</th>
+        <th style="width: 125px;">Product Name</th>
         <th style="width: 55px;">Brand</th>
-        <th style="width: 160px;">Available Size / Variety</th>
+        <th style="width: 130px;">Variety</th>
+        <th style="width: 55px; text-align: center;">Std. Quantity</th>
         <th style="width: 40px; text-align: center;">Page Count</th>
         <th style="width: 55px; text-align: right;">MRP</th>
         <th style="width: 58px; text-align: right;">Sale Price</th>
@@ -610,9 +607,10 @@ require_once __DIR__ . '/includes/header.php';
         <thead>
           <tr>
             <th class="px-3">S.No.</th>
-            <th class="px-3">Book / Notebook Name</th>
+            <th class="px-3">Product Name</th>
             <th class="px-3">Brand</th>
-            <th class="px-3">Available Size / Variety</th>
+            <th class="px-3">Variety</th>
+            <th class="px-3 text-center">Std. Quantity</th>
             <th class="px-3 text-center">Page Count</th>
             <th class="px-3 text-nowrap text-end">MRP</th>
             <th class="px-3 text-nowrap text-end">Sale Price</th>
@@ -634,25 +632,20 @@ require_once __DIR__ . '/includes/header.php';
               } else {
                   $availability = 'Out of Stock';
               }
-              $sizeText = trim((string)($product['size'] ?? ''));
               $varietyDisplay = (string)$entry['variety_display'];
+              $stdQty = max(1, (int)$entry['std_qty']);
             ?>
             <tr>
               <td class="px-3 text-secondary fw-semibold"><?php echo $index + 1; ?></td>
               <td class="px-3 py-3">
                 <div class="price-list-book-name fw-bold"><?php echo htmlspecialchars($product['name'] ?? ''); ?></div>
-                <?php if (!empty($product['category_name'])): ?>
-                  <div class="small text-muted" style="font-size: 0.75rem;"><?php echo htmlspecialchars($product['category_name']); ?></div>
-                <?php endif; ?>
               </td>
-              <td class="px-3 py-3 text-secondary"><?php echo !empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : '<span class="text-muted">—</span>'; ?></td>
+              <td class="px-3 py-3 fw-bold text-dark"><?php echo !empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : '<span class="text-muted fw-normal">—</span>'; ?></td>
               <td class="px-3 py-3">
-                <div class="fw-semibold text-dark"><?php echo htmlspecialchars($sizeText !== '' ? $sizeText : 'Standard'); ?></div>
-                <div class="small text-muted mt-1" style="font-size: 0.75rem;">
-                  <span class="fw-semibold text-secondary">Variety:</span> <?php echo htmlspecialchars($varietyDisplay); ?>
-                </div>
+                <div class="fw-bold text-dark"><?php echo htmlspecialchars($varietyDisplay); ?></div>
               </td>
-              <td class="px-3 py-3 text-secondary text-center"><?php echo !empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span class="text-muted">—</span>'; ?></td>
+              <td class="px-3 py-3 text-center fw-bold"><?php echo number_format($stdQty); ?> pcs / bundle</td>
+              <td class="px-3 py-3 text-dark fw-bold text-center"><?php echo !empty($product['pages']) ? htmlspecialchars((string)$product['pages']) : '<span class="text-muted">—</span>'; ?></td>
               <td class="px-3 text-nowrap text-end price-list-price">
                 <?php echo $entry['mrp'] !== null ? format_price($entry['mrp']) : '<span class="text-muted">—</span>'; ?>
               </td>
