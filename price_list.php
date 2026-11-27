@@ -136,6 +136,16 @@ foreach ($products as $product) {
     $rows[] = $makePriceRow($product, $variety);
 }
 
+$perPage = 20;
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$currentPage = max(1, $currentPage);
+$totalPages = max(1, (int)ceil(count($rows) / $perPage));
+if ($currentPage > $totalPages) {
+    $currentPage = $totalPages;
+}
+$offset = ($currentPage - 1) * $perPage;
+$displayRows = $download ? $rows : array_slice($rows, $offset, $perPage);
+
 if ($download) {
     require_once __DIR__ . '/vendor/autoload.php';
 
@@ -620,8 +630,9 @@ require_once __DIR__ . '/includes/header.php';
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($rows as $index => $entry): ?>
+          <?php foreach ($displayRows as $displayIndex => $entry): ?>
             <?php
+              $index = $offset + $displayIndex;
               $product = $entry['product'];
               $stock = (int)$entry['stock'];
               $bundleStock = (int)$entry['bundle_stock'];
@@ -669,6 +680,57 @@ require_once __DIR__ . '/includes/header.php';
         </tbody>
       </table>
       </div>
+      <?php if ($totalPages > 1): ?>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 px-3 px-md-4 py-3 border-top">
+          <div class="small text-secondary">
+            Showing <strong><?php echo min(count($rows), $offset + 1); ?></strong> to
+            <strong><?php echo min(count($rows), $offset + count($displayRows)); ?></strong> of
+            <strong><?php echo count($rows); ?></strong> price entries
+          </div>
+          <nav aria-label="Price list pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <?php
+                $paginationQuery = $_GET;
+                unset($paginationQuery['page'], $paginationQuery['download']);
+                $baseUrl = 'price_list.php?' . (!empty($paginationQuery) ? http_build_query($paginationQuery) . '&' : '');
+              ?>
+              <li class="page-item <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>">
+                <a class="page-link" href="<?php echo $baseUrl . 'page=' . max(1, $currentPage - 1); ?>">
+                  <i class="bi bi-chevron-left"></i> Previous
+                </a>
+              </li>
+              <?php
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+                if ($startPage > 1):
+              ?>
+                <li class="page-item"><a class="page-link" href="<?php echo $baseUrl . 'page=1'; ?>">1</a></li>
+                <?php if ($startPage > 2): ?>
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                <?php endif; ?>
+              <?php endif; ?>
+              <?php for ($pageNumber = $startPage; $pageNumber <= $endPage; $pageNumber++): ?>
+                <li class="page-item <?php echo $pageNumber === $currentPage ? 'active' : ''; ?>">
+                  <a class="page-link <?php echo $pageNumber === $currentPage ? 'bg-gold border-0 text-white' : ''; ?>" href="<?php echo $baseUrl . 'page=' . $pageNumber; ?>">
+                    <?php echo $pageNumber; ?>
+                  </a>
+                </li>
+              <?php endfor; ?>
+              <?php if ($endPage < $totalPages): ?>
+                <?php if ($endPage < $totalPages - 1): ?>
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                <?php endif; ?>
+                <li class="page-item"><a class="page-link" href="<?php echo $baseUrl . 'page=' . $totalPages; ?>"><?php echo $totalPages; ?></a></li>
+              <?php endif; ?>
+              <li class="page-item <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>">
+                <a class="page-link" href="<?php echo $baseUrl . 'page=' . min($totalPages, $currentPage + 1); ?>">
+                  Next <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 </div>
