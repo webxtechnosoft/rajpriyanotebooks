@@ -136,7 +136,7 @@ foreach ($products as $product) {
     $rows[] = $makePriceRow($product, $variety);
 }
 
-$perPage = 20;
+$perPage = 15;
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $currentPage = max(1, $currentPage);
 $totalPages = max(1, (int)ceil(count($rows) / $perPage));
